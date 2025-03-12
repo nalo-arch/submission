@@ -1,6 +1,7 @@
 streamlit
 pandas
 numpy
-matplotlib==3.7.1
+matplotlib
 seaborn
 scikit-learn
+kiwisolver
