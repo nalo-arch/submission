@@ -21,11 +21,11 @@ start_date = st.sidebar.date_input("Mulai Tanggal", min_date, min_value=min_date
 end_date = st.sidebar.date_input("Sampai Tanggal", max_date, min_value=min_date, max_value=max_date)
 if start_date > end_date:
     st.sidebar.error("Mulai Tanggal harus sebelum atau sama dengan Sampai Tanggal.")
-    
+
 mask_date = (df['dteday'].dt.date >= start_date) & (df['dteday'].dt.date <= end_date)
 df_filtered = df.loc[mask_date]
 
-weather_options = st.sidebar.multiselect("Pilih Kondisi Cuaca", 
+weather_options = st.sidebar.multiselect("Pilih Kondisi Cuaca",
                                            options=sorted(df['weathersit_desc'].unique()),
                                            default=sorted(df['weathersit_desc'].unique()))
 df_filtered = df_filtered[df_filtered['weathersit_desc'].isin(weather_options)]
@@ -40,6 +40,14 @@ st.markdown("**Pertanyaan 2:** Bagaimana pengaruh kondisi cuaca terhadap jumlah 
 
 st.header("Pertanyaan 1: Analisis Berdasarkan Hari")
 
+fig_trend, ax_trend = plt.subplots(figsize=(10, 4))
+ax_trend.plot(df_filtered['dteday'], df_filtered['cnt'], marker='o', linestyle='-', color='b')
+ax_trend.set_title("Trend Penyewaan Sepeda Harian")
+ax_trend.set_xlabel("Tanggal")
+ax_trend.set_ylabel("Jumlah Penyewaan")
+plt.xticks(rotation=45)
+st.pyplot(fig_trend)
+
 hari_order = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 avg_by_day = df_filtered.groupby('weekday_name')['cnt'].mean().reindex(hari_order)
 fig_bar, ax_bar = plt.subplots(figsize=(8, 4))
@@ -48,25 +56,6 @@ ax_bar.set_title("Rata-rata Penyewaan per Hari")
 ax_bar.set_xlabel("Hari")
 ax_bar.set_ylabel("Rata-rata Penyewaan")
 st.pyplot(fig_bar)
-
-st.title("Analisis Hari Kerja vs. Weekend pada Penyewaan Sepeda")
-st.markdown("Visualisasi berikut membandingkan rata-rata penyewaan sepeda antara hari kerja dan akhir pekan.")
-
-avg_day_type = df_filtered.groupby('day_type')['cnt'].mean().reset_index()
-
-fig, ax = plt.subplots(figsize=(8, 4))
-sns.barplot(x='day_type', y='cnt', data=avg_day_type, palette='viridis', ax=ax)
-ax.set_title("Rata-rata Penyewaan: Hari Kerja vs. Weekend")
-ax.set_xlabel("Tipe Hari")
-ax.set_ylabel("Rata-rata Penyewaan")
-st.pyplot(fig)
-
-fig2, ax2 = plt.subplots(figsize=(8, 4))
-sns.boxplot(x='day_type', y='cnt', data=df_filtered, palette='coolwarm', ax=ax2)
-ax2.set_title("Distribusi Penyewaan Berdasarkan Tipe Hari")
-ax2.set_xlabel("Tipe Hari")
-ax2.set_ylabel("Jumlah Penyewaan")
-st.pyplot(fig2)
 
 if 'hr' in df.columns:
     st.subheader("Analisis Lanjutan Berdasarkan Waktu (Dataset Hour)")
