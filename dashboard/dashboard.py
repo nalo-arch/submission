@@ -40,19 +40,15 @@ st.markdown("**Pertanyaan 2:** Bagaimana pengaruh kondisi cuaca terhadap jumlah 
 
 st.header("Pertanyaan 1: Analisis Berdasarkan Hari")
 
-df_hour['day_type'] = df_hour['weekday'].apply(lambda x: 'Weekend' if x in [0, 6] else 'Weekday')
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.lineplot(data=hourly_trend, x='hr', y='cnt', hue='day_type', marker='o', ax=ax)
+ax.set_title('Rata-rata Penyewaan Sepeda per Jam (Hari Kerja vs. Akhir Pekan)')
+ax.set_xlabel('Jam')
+ax.set_ylabel('Rata-rata Penyewaan')
+ax.set_xticks(range(0, 24))
+ax.legend(title='Tipe Hari')
 
-hourly_trend = df_hour.groupby(['hr', 'day_type'])['cnt'].mean().reset_index()
-
-plt.figure(figsize=(10, 6))
-sns.lineplot(data=hourly_trend, x='hr', y='cnt', hue='day_type', marker='o')
-plt.title('Rata-rata Penyewaan Sepeda per Jam (Hari Kerja vs. Akhir Pekan)')
-plt.xlabel('Jam')
-plt.ylabel('Rata-rata Penyewaan')
-plt.xticks(range(0, 24))
-plt.legend(title='Tipe Hari')
-plt.show()
-
+st.pyplot(fig)
 hari_order = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 avg_by_day = df_filtered.groupby('weekday_name')['cnt'].mean().reindex(hari_order)
 fig_bar, ax_bar = plt.subplots(figsize=(8, 4))
