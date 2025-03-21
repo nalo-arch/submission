@@ -40,13 +40,18 @@ st.markdown("**Pertanyaan 2:** Bagaimana pengaruh kondisi cuaca terhadap jumlah 
 
 st.header("Pertanyaan 1: Analisis Berdasarkan Hari")
 
-fig_trend, ax_trend = plt.subplots(figsize=(10, 4))
-ax_trend.plot(df_filtered['dteday'], df_filtered['cnt'], marker='o', linestyle='-', color='b')
-ax_trend.set_title("Trend Penyewaan Sepeda Harian")
-ax_trend.set_xlabel("Tanggal")
-ax_trend.set_ylabel("Jumlah Penyewaan")
-plt.xticks(rotation=45)
-st.pyplot(fig_trend)
+df_hour['day_type'] = df_hour['weekday'].apply(lambda x: 'Weekend' if x in [0, 6] else 'Weekday')
+
+hourly_trend = df_hour.groupby(['hr', 'day_type'])['cnt'].mean().reset_index()
+
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=hourly_trend, x='hr', y='cnt', hue='day_type', marker='o')
+plt.title('Rata-rata Penyewaan Sepeda per Jam (Hari Kerja vs. Akhir Pekan)')
+plt.xlabel('Jam')
+plt.ylabel('Rata-rata Penyewaan')
+plt.xticks(range(0, 24))
+plt.legend(title='Tipe Hari')
+plt.show()
 
 hari_order = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 avg_by_day = df_filtered.groupby('weekday_name')['cnt'].mean().reindex(hari_order)
@@ -91,16 +96,6 @@ ax_box.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig_box)
 
 if 'temp' in df_filtered.columns:
-    fig_scatter, ax_scatter = plt.subplots(figsize=(8, 4))
-    sns.scatterplot(x='temp', y='cnt', data=df_filtered, ax=ax_scatter, color='teal')
-    ax_scatter.set_title("Hubungan Suhu dengan Penyewaan Sepeda")
-    ax_scatter.set_xlabel("Suhu (Normalisasi)")
-    ax_scatter.set_ylabel("Jumlah Penyewaan")
-    st.pyplot(fig_scatter)
-else:
-    st.info("Kolom 'temp' tidak tersedia di dataset.")
-
-if 'temp' in df_filtered.columns:
     st.subheader("Analisis Lanjutan: Kategori Suhu")
     temp_bins = [0, 0.3, 0.7, 1]
     temp_labels = ['Rendah', 'Sedang', 'Tinggi']
@@ -112,3 +107,13 @@ if 'temp' in df_filtered.columns:
     ax_temp.set_xlabel("Kategori Suhu")
     ax_temp.set_ylabel("Rata-rata Penyewaan")
     st.pyplot(fig_temp)
+
+if 'temp' in df_filtered.columns:
+    fig_scatter, ax_scatter = plt.subplots(figsize=(8, 4))
+    sns.scatterplot(x='temp', y='cnt', data=df_filtered, ax=ax_scatter, color='teal')
+    ax_scatter.set_title("Hubungan Suhu dengan Penyewaan Sepeda")
+    ax_scatter.set_xlabel("Suhu (Normalisasi)")
+    ax_scatter.set_ylabel("Jumlah Penyewaan")
+    st.pyplot(fig_scatter)
+else:
+    st.info("Kolom 'temp' tidak tersedia di dataset.")
