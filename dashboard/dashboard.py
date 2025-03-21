@@ -12,6 +12,8 @@ sns.set(style="whitegrid")
 def load_data():
     df = pd.read_csv('dashboard/main_data.csv', engine='python', encoding='utf-8')
     df['dteday'] = pd.to_datetime(df['dteday'])
+    if 'hr_list' in df.columns:
+        df['hr_list'] = df['hr_list'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
     return df
 
 df = load_data()
@@ -46,7 +48,6 @@ Dashboard ini menyajikan hasil analisis data untuk menjawab dua pertanyaan bisni
 """)
 
 st.header("Pertanyaan 1: Distribusi Berdasarkan Hari")
-
 if 'weekday_name' not in df_filtered.columns:
     weekday_mapping = {0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu'}
     df_filtered['weekday_name'] = df_filtered['weekday'].map(weekday_mapping)
@@ -55,58 +56,40 @@ avg_per_day = df_filtered.groupby('weekday_name')['cnt'].mean().reindex(['Minggu
 fig1, ax1 = plt.subplots(figsize=(8,4))
 sns.barplot(x=avg_per_day.index, y=avg_per_day.values, palette='viridis', ax=ax1)
 ax1.set_title("Rata-rata Penyewaan per Hari")
-ax1.set_xlabel("Hari")
-ax1.set_ylabel("Rata-rata Penyewaan")
 st.pyplot(fig1)
 
 fig2, ax2 = plt.subplots(figsize=(8,4))
 sns.boxplot(x='weekday_name', y='cnt', data=df_filtered, order=['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'], palette='pastel', ax=ax2)
 ax2.set_title("Distribusi Penyewaan Berdasarkan Hari")
-ax2.set_xlabel("Hari")
-ax2.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig2)
 
 st.subheader("Visualisasi Per Jam (Data dari hr_list)")
-if 'hr_list' in df_filtered.columns and df_filtered['hr_list'].notna().any():
-    df_filtered['hr_list'] = df_filtered['hr_list'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
-
-        all_hours = []
-        day_types = []
-        for idx, row in df_filtered.dropna(subset=['hr_list']).iterrows():
-            dt = 'Weekday' if row['workingday_hour'] == 1 else 'Weekend'
-            if isinstance(row['hr_list'], list):
-                for h in row['hr_list']:
-                    all_hours.append(h)
-                    day_types.append(dt)
-        if all_hours:
-            df_hour_agg = pd.DataFrame({'hr': all_hours, 'day_type': day_types})
-            hourly_trend = df_hour_agg.groupby(['hr', 'day_type']).size().reset_index(name='count')
-            fig3, ax3 = plt.subplots(figsize=(10, 6))
-            sns.lineplot(data=hourly_trend, x='hr', y='count', hue='day_type', marker='o', ax=ax3)
-            ax3.set_title("Rata-rata Penyewaan per Jam (Weekday vs. Weekend)")
-            ax3.set_xlabel("Jam")
-            ax3.set_ylabel("Jumlah Penyewaan")
-            ax3.set_xticks(range(0, 24))
-            st.pyplot(fig3)
-        else:
-            st.info("Tidak ada data jam yang tersedia.")
+if 'hr_list' in df_filtered.columns and df_filtered['hr_list'].notna().any() and 'workingday_hour' in df_filtered.columns:
+    all_hours = []
+    day_types = []
+    for _, row in df_filtered.dropna(subset=['hr_list']).iterrows():
+        dt = 'Weekday' if row['workingday_hour'] == 1 else 'Weekend'
+        for h in row['hr_list']:
+            all_hours.append(h)
+            day_types.append(dt)
+    if all_hours:
+        df_hour_agg = pd.DataFrame({'hr': all_hours, 'day_type': day_types})
+        hourly_trend = df_hour_agg.groupby(['hr', 'day_type']).size().reset_index(name='count')
+        fig3, ax3 = plt.subplots(figsize=(10, 6))
+        sns.lineplot(data=hourly_trend, x='hr', y='count', hue='day_type', marker='o', ax=ax3)
+        ax3.set_title("Rata-rata Penyewaan per Jam (Weekday vs. Weekend)")
+        ax3.set_xlabel("Jam")
+        ax3.set_ylabel("Jumlah Penyewaan")
+        ax3.set_xticks(range(0, 24))
+        st.pyplot(fig3)
     else:
-        st.info("Kolom 'workingday_hour' tidak tersedia dalam data.")
+        st.info("Tidak ada data jam yang tersedia.")
 else:
     st.info("Data per jam tidak tersedia dalam file main_data.csv.")
 
-st.header("Pertanyaan 2: Pengaruh Kondisi Cuaca terhadap Penyewaan Sepeda")
+st.header("Pertanyaan 2: Pengaruh Kondisi Cuaca terhadap Penyewaan")
 weather_order = ['Clear', 'Mist', 'Light Rain', 'Heavy Rain']
 fig4, ax4 = plt.subplots(figsize=(8,4))
 sns.boxplot(x='weathersit_desc', y='cnt', data=df_filtered, order=weather_order, palette='coolwarm', ax=ax4)
 ax4.set_title("Pengaruh Kondisi Cuaca terhadap Penyewaan")
-ax4.set_xlabel("Kondisi Cuaca")
-ax4.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig4)
-
-st.header("Heatmap Korelasi antar Fitur (Dataset Day)")
-corr = df_filtered.corr()
-fig8, ax8 = plt.subplots(figsize=(10,8))
-sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax8)
-ax8.set_title("Heatmap Korelasi antar Fitur")
-st.pyplot(fig8)
