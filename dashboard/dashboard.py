@@ -105,42 +105,6 @@ ax4.set_xlabel("Kondisi Cuaca")
 ax4.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig4)
 
-st.header("Analisis Lanjutan")
-
-if 'temp' in df_filtered.columns:
-    fig5, ax5 = plt.subplots(figsize=(8,4))
-    sns.scatterplot(x='temp', y='cnt', data=df_filtered, color='teal', ax=ax5)
-    ax5.set_title("Hubungan Suhu dan Penyewaan")
-    ax5.set_xlabel("Suhu (Normalisasi)")
-    ax5.set_ylabel("Jumlah Penyewaan")
-    st.pyplot(fig5)
-else:
-    st.info("Kolom 'temp' tidak tersedia.")
-
-if 'temp' in df_filtered.columns:
-    temp_bins = [0, 0.3, 0.7, 1]
-    temp_labels = ['Rendah', 'Sedang', 'Tinggi']
-    df_filtered['temp_category'] = pd.cut(df_filtered['temp'], bins=temp_bins, labels=temp_labels, include_lowest=True)
-    temp_avg = df_filtered.groupby('temp_category')['cnt'].mean().reset_index()
-    fig6, ax6 = plt.subplots(figsize=(8,4))
-    sns.barplot(x='temp_category', y='cnt', data=temp_avg, palette='magma', ax=ax6)
-    ax6.set_title("Penyewaan Berdasarkan Kategori Suhu")
-    ax6.set_xlabel("Kategori Suhu")
-    ax6.set_ylabel("Rata-rata Penyewaan")
-    st.pyplot(fig6)
-
-if 'hum' in df_filtered.columns:
-    hum_bins = [0, 0.4, 0.7, 1]
-    hum_labels = ['Rendah', 'Sedang', 'Tinggi']
-    df_filtered['hum_category'] = pd.cut(df_filtered['hum'], bins=hum_bins, labels=hum_labels, include_lowest=True)
-    hum_avg = df_filtered.groupby('hum_category')['cnt'].mean().reset_index()
-    fig7, ax7 = plt.subplots(figsize=(8,4))
-    sns.barplot(x='hum_category', y='cnt', data=hum_avg, palette='coolwarm', ax=ax7)
-    ax7.set_title("Penyewaan Berdasarkan Kategori Kelembapan")
-    ax7.set_xlabel("Kategori Kelembapan")
-    ax7.set_ylabel("Rata-rata Penyewaan")
-    st.pyplot(fig7)
-
 st.header("Heatmap Korelasi antar Fitur (Dataset Day)")
 corr = df_filtered.corr()
 fig9, ax9 = plt.subplots(figsize=(10,8))
