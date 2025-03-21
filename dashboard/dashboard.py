@@ -39,7 +39,11 @@ df_filtered = df[df['season'].isin(selected_season_nums) & df['weathersit_desc']
 st.sidebar.write(f"Data tersisa: {df_filtered.shape[0]} baris")
 
 st.title("Dashboard Analisis Data Bike Sharing")
-st.markdown("Dashboard ini menyajikan hasil analisis data untuk menjawab dua pertanyaan bisnis utama: 1. **Distribusi Penyewaan Sepeda Berdasarkan Hari (Hari Kerja vs. Akhir Pekan)** 2. **Pengaruh Kondisi Cuaca terhadap Penyewaan Sepeda**")
+st.markdown("""
+Dashboard ini menyajikan hasil analisis data untuk menjawab dua pertanyaan bisnis utama:
+1. **Distribusi Penyewaan Sepeda Berdasarkan Hari (Hari Kerja vs. Akhir Pekan)**
+2. **Pengaruh Kondisi Cuaca terhadap Penyewaan Sepeda**
+""")
 
 st.header("Pertanyaan 1: Distribusi Penyewaan Berdasarkan Hari")
 
