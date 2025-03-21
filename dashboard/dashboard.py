@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import ast
+import numpy as np
 
-st.set_page_config(page_title="Dashboard Analisis Bike Sharing", layout="wide")
+st.set_page_config(page_title="Dashboard Analisis Data Bike Sharing", layout="wide")
 sns.set(style="whitegrid")
 
 @st.cache_data
@@ -21,7 +23,6 @@ start_date = st.sidebar.date_input("Mulai Tanggal", min_date, min_value=min_date
 end_date = st.sidebar.date_input("Sampai Tanggal", max_date, min_value=min_date, max_value=max_date)
 if start_date > end_date:
     st.sidebar.error("Mulai Tanggal harus sebelum atau sama dengan Sampai Tanggal.")
-
 mask_date = (df['dteday'].dt.date >= start_date) & (df['dteday'].dt.date <= end_date)
 df_filtered = df.loc[mask_date]
 
@@ -34,8 +35,7 @@ selected_season_nums = [num for num, name in season_mapping.items() if name in s
 available_weathers = sorted(df['weathersit_desc'].unique())
 selected_weathers = st.sidebar.multiselect("Pilih Kondisi Cuaca", options=available_weathers, default=available_weathers)
 
-df_filtered = df[df['season'].isin(selected_season_nums) & df['weathersit_desc'].isin(selected_weathers)]
-
+df_filtered = df_filtered[df_filtered['season'].isin(selected_season_nums) & df_filtered['weathersit_desc'].isin(selected_weathers)]
 st.sidebar.write(f"Data tersisa: {df_filtered.shape[0]} baris")
 
 st.title("Dashboard Analisis Data Bike Sharing")
@@ -45,11 +45,12 @@ Dashboard ini menyajikan hasil analisis data untuk menjawab dua pertanyaan bisni
 2. **Pengaruh Kondisi Cuaca terhadap Penyewaan Sepeda**
 """)
 
-st.header("Pertanyaan 1: Distribusi Penyewaan Berdasarkan Hari")
+st.header("Pertanyaan 1: Distribusi Berdasarkan Hari")
 
 if 'weekday_name' not in df_filtered.columns:
     weekday_mapping = {0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu'}
     df_filtered['weekday_name'] = df_filtered['weekday'].map(weekday_mapping)
+
 avg_per_day = df_filtered.groupby('weekday_name')['cnt'].mean().reindex(['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'])
 fig1, ax1 = plt.subplots(figsize=(8,4))
 sns.barplot(x=avg_per_day.index, y=avg_per_day.values, palette='viridis', ax=ax1)
@@ -65,19 +66,18 @@ ax2.set_xlabel("Hari")
 ax2.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig2)
 
-st.subheader("Visualisasi Per Jam (Dari Data yang Digabung)")
-if 'hr' in df_filtered.columns and df_filtered['hr'].notna().any():
-    df_filtered['hr_list'] = df_filtered['hr'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
-    
-    if 'workingday_hour' in df_filtered.columns:
+st.subheader("Visualisasi Per Jam (Data dari hr_list)")
+if 'hr_list' in df_filtered.columns and df_filtered['hr_list'].notna().any():
+    df_filtered['hr_list'] = df_filtered['hr_list'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+
         all_hours = []
         day_types = []
         for idx, row in df_filtered.dropna(subset=['hr_list']).iterrows():
-            day_type = 'Weekday' if row['workingday_hour'] == 1 else 'Weekend'
+            dt = 'Weekday' if row['workingday_hour'] == 1 else 'Weekend'
             if isinstance(row['hr_list'], list):
                 for h in row['hr_list']:
                     all_hours.append(h)
-                    day_types.append(day_type)
+                    day_types.append(dt)
         if all_hours:
             df_hour_agg = pd.DataFrame({'hr': all_hours, 'day_type': day_types})
             hourly_trend = df_hour_agg.groupby(['hr', 'day_type']).size().reset_index(name='count')
@@ -96,7 +96,6 @@ else:
     st.info("Data per jam tidak tersedia dalam file main_data.csv.")
 
 st.header("Pertanyaan 2: Pengaruh Kondisi Cuaca terhadap Penyewaan Sepeda")
-
 weather_order = ['Clear', 'Mist', 'Light Rain', 'Heavy Rain']
 fig4, ax4 = plt.subplots(figsize=(8,4))
 sns.boxplot(x='weathersit_desc', y='cnt', data=df_filtered, order=weather_order, palette='coolwarm', ax=ax4)
@@ -107,7 +106,7 @@ st.pyplot(fig4)
 
 st.header("Heatmap Korelasi antar Fitur (Dataset Day)")
 corr = df_filtered.corr()
-fig9, ax9 = plt.subplots(figsize=(10,8))
-sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax9)
-ax9.set_title("Heatmap Korelasi antar Fitur")
-st.pyplot(fig9)
+fig8, ax8 = plt.subplots(figsize=(10,8))
+sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax8)
+ax8.set_title("Heatmap Korelasi antar Fitur")
+st.pyplot(fig8)
