@@ -15,6 +15,16 @@ def load_data():
 df = load_data()
 
 st.sidebar.header("Filter Data")
+min_date = df['dteday'].min().date()
+max_date = df['dteday'].max().date()
+start_date = st.sidebar.date_input("Mulai Tanggal", min_date, min_value=min_date, max_value=max_date)
+end_date = st.sidebar.date_input("Sampai Tanggal", max_date, min_value=min_date, max_value=max_date)
+if start_date > end_date:
+    st.sidebar.error("Mulai Tanggal harus sebelum atau sama dengan Sampai Tanggal.")
+    
+mask_date = (df['dteday'].dt.date >= start_date) & (df['dteday'].dt.date <= end_date)
+df_filtered = df.loc[mask_date]
+
 season_mapping = {1: 'Spring', 2: 'Summer', 3: 'Fall', 4: 'Winter'}
 available_seasons = sorted(df['season'].unique())
 season_names = [season_mapping[s] for s in available_seasons]
