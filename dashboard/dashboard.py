@@ -65,18 +65,35 @@ ax2.set_xlabel("Hari")
 ax2.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig2)
 
-if df_hour is not None and 'hr' in df_hour.columns and 'workingday' in df_hour.columns:
-    df_hour['day_type'] = df_hour['weekday'].apply(lambda x: 'Weekday' if x == 1 else 'Weekend')
-    hourly_trend = df_hour.groupby(['hr', 'day_type'])['cnt'].mean().reset_index()
-    fig3, ax3 = plt.subplots(figsize=(10, 6))
-    sns.lineplot(data=hourly_trend, x='hr', y='cnt', hue='day_type', marker='o', ax=ax3)
-    ax3.set_title("Rata-rata Penyewaan per Jam (Weekday vs. Weekend)")
-    ax3.set_xlabel("Jam")
-    ax3.set_ylabel("Rata-rata Penyewaan")
-    ax3.set_xticks(range(0, 24))
-    st.pyplot(fig3)
+st.subheader("Visualisasi Per Jam (Dari Data yang Digabung)")
+if 'hr' in df_filtered.columns and df_filtered['hr'].notna().any():
+    df_filtered['hr_list'] = df_filtered['hr'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+    
+    if 'workingday_hour' in df_filtered.columns:
+        all_hours = []
+        day_types = []
+        for idx, row in df_filtered.dropna(subset=['hr_list']).iterrows():
+            day_type = 'Weekday' if row['workingday_hour'] == 1 else 'Weekend'
+            if isinstance(row['hr_list'], list):
+                for h in row['hr_list']:
+                    all_hours.append(h)
+                    day_types.append(day_type)
+        if all_hours:
+            df_hour_agg = pd.DataFrame({'hr': all_hours, 'day_type': day_types})
+            hourly_trend = df_hour_agg.groupby(['hr', 'day_type']).size().reset_index(name='count')
+            fig3, ax3 = plt.subplots(figsize=(10, 6))
+            sns.lineplot(data=hourly_trend, x='hr', y='count', hue='day_type', marker='o', ax=ax3)
+            ax3.set_title("Rata-rata Penyewaan per Jam (Weekday vs. Weekend)")
+            ax3.set_xlabel("Jam")
+            ax3.set_ylabel("Jumlah Penyewaan")
+            ax3.set_xticks(range(0, 24))
+            st.pyplot(fig3)
+        else:
+            st.info("Tidak ada data jam yang tersedia.")
+    else:
+        st.info("Kolom 'workingday_hour' tidak tersedia dalam data.")
 else:
-    st.info("Data per jam tidak tersedia untuk visualisasi 'Rata-rata Penyewaan per Jam'.")
+    st.info("Data per jam tidak tersedia dalam file main_data.csv.")
 
 st.header("Pertanyaan 2: Pengaruh Kondisi Cuaca terhadap Penyewaan Sepeda")
 
