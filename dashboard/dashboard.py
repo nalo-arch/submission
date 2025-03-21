@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,8 +15,12 @@ def load_data():
 
 @st.cache_data
 def load_hour_data():
-    df_hour = pd.read_csv('dashboard/hour_data.csv', engine='python', encoding='utf-8')
-    return df_hour
+    hour_data_path = 'dashboard/hour_data.csv'
+    if os.path.exists(hour_data_path):
+        df_hour = pd.read_csv(hour_data_path, engine='python', encoding='utf-8')
+        return df_hour
+    else:
+        return None
 
 df = load_data()
 df_hour = load_hour_data()
@@ -70,8 +75,7 @@ ax2.set_xlabel("Hari")
 ax2.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig2)
 
-st.subheader("Visualisasi Per Jam (Data Hour)")
-if 'hr' in df_hour.columns and 'workingday' in df_hour.columns:
+if df_hour is not None and 'hr' in df_hour.columns and 'workingday' in df_hour.columns:
     df_hour['day_type'] = df_hour['weekday'].apply(lambda x: 'Weekday' if x == 1 else 'Weekend')
     hourly_trend = df_hour.groupby(['hr', 'day_type'])['cnt'].mean().reset_index()
     fig3, ax3 = plt.subplots(figsize=(10, 6))
@@ -84,7 +88,7 @@ if 'hr' in df_hour.columns and 'workingday' in df_hour.columns:
 else:
     st.info("Data per jam tidak tersedia untuk visualisasi 'Rata-rata Penyewaan per Jam'.")
 
-if 'hr' in df_hour.columns:
+if df_hour is not None and 'hr' in df_hour.columns:
     def time_slot(hour):
         if 0 <= hour < 6:
             return 'Early Morning'
