@@ -63,7 +63,6 @@ sns.boxplot(x='weekday_name', y='cnt', data=df_filtered, order=['Minggu', 'Senin
 ax2.set_title("Distribusi Penyewaan Berdasarkan Hari")
 st.pyplot(fig2)
 
-st.subheader("Visualisasi Per Jam (Data dari hr_list)")
 if 'hr_list' in df_filtered.columns and df_filtered['hr_list'].notna().any() and 'workingday_hour' in df_filtered.columns:
     all_hours = []
     day_types = []
