@@ -65,6 +65,19 @@ ax2.set_xlabel("Hari")
 ax2.set_ylabel("Jumlah Penyewaan")
 st.pyplot(fig2)
 
+if df_hour is not None and 'hr' in df_hour.columns and 'workingday' in df_hour.columns:
+    df_hour['day_type'] = df_hour['weekday'].apply(lambda x: 'Weekday' if x == 1 else 'Weekend')
+    hourly_trend = df_hour.groupby(['hr', 'day_type'])['cnt'].mean().reset_index()
+    fig3, ax3 = plt.subplots(figsize=(10, 6))
+    sns.lineplot(data=hourly_trend, x='hr', y='cnt', hue='day_type', marker='o', ax=ax3)
+    ax3.set_title("Rata-rata Penyewaan per Jam (Weekday vs. Weekend)")
+    ax3.set_xlabel("Jam")
+    ax3.set_ylabel("Rata-rata Penyewaan")
+    ax3.set_xticks(range(0, 24))
+    st.pyplot(fig3)
+else:
+    st.info("Data per jam tidak tersedia untuk visualisasi 'Rata-rata Penyewaan per Jam'.")
+
 st.header("Pertanyaan 2: Pengaruh Kondisi Cuaca terhadap Penyewaan Sepeda")
 
 weather_order = ['Clear', 'Mist', 'Light Rain', 'Heavy Rain']
