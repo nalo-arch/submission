@@ -92,4 +92,4 @@ weather_order = ['Clear', 'Mist', 'Light Rain', 'Heavy Rain']
 fig4, ax4 = plt.subplots(figsize=(8,4))
 sns.boxplot(x='weathersit_desc', y='cnt', data=df_filtered, order=weather_order, palette='coolwarm', ax=ax4)
 ax4.set_title("Pengaruh Kondisi Cuaca terhadap Penyewaan")
-st.pyplot(fRain
+st.pyplot(fig4)
