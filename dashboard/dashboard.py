@@ -84,7 +84,7 @@ if 'hr_list' in df.columns and df['hr_list'].notna().any() and 'workingday_hour'
         ax.set_ylabel('Jumlah Penyewaan')
         ax.set_xticks(range(0, 24))
         ax.legend(title='Tipe Hari')
-        st.pyplot(fig3)
+        st.pyplot(fig)
     else:
         st.info("Tidak ada data jam yang tersedia.")
 else:
