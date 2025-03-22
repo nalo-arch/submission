@@ -12,8 +12,6 @@ sns.set(style="whitegrid")
 def load_data():
     df = pd.read_csv('dashboard/main_data.csv', engine='python', encoding='utf-8')
     df['dteday'] = pd.to_datetime(df['dteday'])
-    if 'hr_list' in df.columns:
-        df['hr_list'] = df['hr_list'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
     return df
 
 df = load_data()
