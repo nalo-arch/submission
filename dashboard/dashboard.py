@@ -63,29 +63,19 @@ sns.boxplot(x='weekday_name', y='cnt', data=df_filtered, order=['Minggu', 'Senin
 ax2.set_title("Distribusi Penyewaan Berdasarkan Hari")
 st.pyplot(fig2)
 
-st.subheader("Visualisasi Per Jam (Data dari hr_list)")
-if 'hr_list' in df_filtered.columns and df_filtered['hr_list'].notna().any() and 'workingday_hour' in df_filtered.columns:
-    all_hours = []
-    day_types = []
-    for _, row in df_filtered.dropna(subset=['hr_list']).iterrows():
-        dt = 'Weekday' if row['workingday_hour'] == 1 else 'Weekend'
-        for h in row['hr_list']:
-            all_hours.append(h)
-            day_types.append(dt)
-    if all_hours:
-        df_hour_agg = pd.DataFrame({'hr': all_hours, 'day_type': day_types})
-        hourly_trend = df_hour_agg.groupby(['hr', 'day_type']).size().reset_index(name='count')
-        fig3, ax3 = plt.subplots(figsize=(10, 6))
-        sns.lineplot(data=hourly_trend, x='hr', y='count', hue='day_type', marker='o', ax=ax3)
-        ax3.set_title("Rata-rata Penyewaan per Jam (Weekday vs. Weekend)")
-        ax3.set_xlabel("Jam")
-        ax3.set_ylabel("Jumlah Penyewaan")
-        ax3.set_xticks(range(0, 24))
-        st.pyplot(fig3)
-    else:
-        st.info("Tidak ada data jam yang tersedia.")
-else:
-    st.info("Data per jam tidak tersedia dalam file main_data.csv.")
+df_hour['day_type'] = df_hour['weekday'].apply(lambda x: 'Weekend' if x in [0, 6] else 'Weekday')
+
+hourly_trend = df_hour.groupby(['hr', 'day_type'])['cnt'].mean().reset_index()
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.lineplot(data=hourly_trend, x='hr', y='cnt', hue='day_type', marker='o', ax=ax)
+ax.set_title('Rata-rata Penyewaan Sepeda per Jam (Hari Kerja vs. Akhir Pekan)')
+ax.set_xlabel('Jam')
+ax.set_ylabel('Rata-rata Penyewaan')
+ax.set_xticks(range(0, 24))
+ax.legend(title='Tipe Hari')
+
+st.pyplot(fig3)
 
 st.header("Pertanyaan 2: Pengaruh Kondisi Cuaca terhadap Penyewaan")
 weather_order = ['Clear', 'Mist', 'Light Rain', 'Heavy Rain']
