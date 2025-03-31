@@ -102,16 +102,6 @@ with tabs[1]:
     ax4.set_xlabel("Kondisi Cuaca")
     ax4.set_ylabel("Jumlah Penyewaan")
     st.pyplot(fig4)
-    
-    if 'temp' in df_filtered.columns:
-        fig_scatter, ax_scatter = plt.subplots(figsize=(8,4))
-        sns.scatterplot(x='temp', y='cnt', data=df_filtered, color='teal', ax=ax_scatter)
-        ax_scatter.set_title("Hubungan Suhu dengan Penyewaan")
-        ax_scatter.set_xlabel("Suhu (Normalisasi)")
-        ax_scatter.set_ylabel("Jumlah Penyewaan")
-        st.pyplot(fig_scatter)
-    else:
-        st.info("Kolom 'temp' tidak tersedia di dataset.")
 
 with tabs[2]:
     st.header("Analisis Lanjutan")
