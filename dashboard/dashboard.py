@@ -142,7 +142,7 @@ with tabs[2]:
     st.pyplot(fig_hum)
     
     st.subheader("3. Rata-rata Penyewaan Berdasarkan Slot Waktu")
-    if 'hr' in df.columns:
+    if 'hr_list' in df.columns:
         def time_slot(hour):
             if 0 <= hour <= 5:
                 return 'Early Morning'
@@ -152,7 +152,7 @@ with tabs[2]:
                 return 'Afternoon'
             else:
                 return 'Evening'
-        df['time_slot'] = df['hr'].apply(time_slot)
+        df['time_slot'] = df['hr_list'].apply(time_slot)
         time_slot_analysis = df.groupby('time_slot')['cnt'].mean().reset_index()
         order = ['Early Morning','Morning','Afternoon','Evening']
         fig_slot, ax_slot = plt.subplots(figsize=(8,6))
@@ -162,4 +162,4 @@ with tabs[2]:
         ax_slot.set_ylabel('Rata-rata Penyewaan')
         st.pyplot(fig_slot)
     else:
-        st.info("Data slot waktu tidak tersedia karena kolom 'hr' tidak ditemukan.")
+        st.info("Data slot waktu tidak tersedia karena kolom 'hr_list' tidak ditemukan.")
