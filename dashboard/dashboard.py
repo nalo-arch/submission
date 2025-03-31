@@ -130,26 +130,3 @@ with tabs[2]:
     ax_hum.set_xlabel('Kategori Kelembapan')
     ax_hum.set_ylabel('Rata-rata Penyewaan')
     st.pyplot(fig_hum)
-    
-    st.subheader("3. Rata-rata Penyewaan Berdasarkan Slot Waktu")
-    if 'cnt_hour' in df.columns:
-        def time_slot(hour):
-            if 0 <= hour <= 5:
-                return 'Early Morning'
-            elif 6 <= hour <= 11:
-                return 'Morning'
-            elif 12 <= hour <= 17:
-                return 'Afternoon'
-            else:
-                return 'Evening'
-        df['time_slot'] = df['cnt_hour'].apply(time_slot)
-        time_slot_analysis = df.groupby('time_slot')['cnt'].mean().reset_index()
-        order = ['Early Morning','Morning','Afternoon','Evening']
-        fig_slot, ax_slot = plt.subplots(figsize=(8,6))
-        sns.barplot(x='time_slot', y='cnt', data=time_slot_analysis, order=order, palette='coolwarm', ax=ax_slot)
-        ax_slot.set_title('Rata-rata Penyewaan Berdasarkan Slot Waktu')
-        ax_slot.set_xlabel('Slot Waktu')
-        ax_slot.set_ylabel('Rata-rata Penyewaan')
-        st.pyplot(fig_slot)
-    else:
-        st.info("Data slot waktu tidak tersedia karena kolom 'cnt_hou' tidak ditemukan.")
